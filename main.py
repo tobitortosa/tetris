@@ -3,25 +3,36 @@ from game import Game
 from colors import Colors
 from dbfunctions import *
 
-create_table_jugadores()
+create_table_players()
 
 pygame.display.set_caption("Tetris")
 pygame.init()
 
+screen = pygame.display.set_mode((500, 620))
 
-nombre = ""
+name = ""
 active = False
+
+clock = pygame.time.Clock()
+game = Game()
+
+GAME_UPDATE = pygame.USEREVENT
+pygame.time.set_timer(GAME_UPDATE, 30)
+
+TIMER = pygame.USEREVENT + 1
+pygame.time.set_timer(TIMER, 1000)
 
 
 title_font = pygame.font.Font(None, 40)
-ranking_font_nombre_puntos = pygame.font.Font(None, 30)
+ranking_font_name_points = pygame.font.Font(None, 30)
 ranking_font = pygame.freetype.SysFont(None, 28, True, False)
 
 
 menu_text = title_font.render("Ingrese su nombre", True, Colors.white)
 ranking_text = title_font.render("Mejores Puntuaciones", True, Colors.white)
-ranking_text_puntos = ranking_font_nombre_puntos.render("Puntos", True, Colors.white)
-ranking_text_nombre = ranking_font_nombre_puntos.render("Nombre", True, Colors.white)
+ranking_text_points = ranking_font_name_points.render("Points", True, Colors.white)
+ranking_text_name = ranking_font_name_points.render("Name", True, Colors.white)
+
 score_surface = title_font.render("Score", True, Colors.white)
 next_surface = title_font.render("Next", True, Colors.white)
 game_over_surface = title_font.render("GAME OVER", True, Colors.white)
@@ -32,28 +43,11 @@ score_rect = pygame.Rect(320, 55, 170, 60)
 time_rect = pygame.Rect(320, 530, 170, 60)
 next_rect = pygame.Rect(320, 215, 170, 180)
 
-
-screen = pygame.display.set_mode((500, 620))
-
-clock = pygame.time.Clock()
-game = Game()
-
-
-GAME_UPDATE = pygame.USEREVENT
-pygame.time.set_timer(GAME_UPDATE, 300)
-
-TIMER = pygame.USEREVENT + 1
-pygame.time.set_timer(TIMER, 1000)
-
-
 game_time = 180
-
-
 menu_state = True
 game_state = False
 ranking_state = False
 
-# menu button
 
 start_button_surface = title_font.render("Start", True, Colors.white)
 start_button = pygame.Rect(150, 200, 200, 60)
@@ -64,13 +58,7 @@ ranking_button = pygame.Rect(150, 300, 200, 60)
 menu_button_surface = title_font.render("Menu", True, Colors.white)
 menu_button = pygame.Rect(150, 500, 200, 60)
 
-
-menu_state_flag = False
-
-
-start_ticks = pygame.time.get_ticks()  # starter tick
-
-jugadores = get_jugadores()
+players = get_players()
 
 while True:
     while menu_state:
@@ -82,9 +70,9 @@ while True:
             if event.type == pygame.KEYDOWN:
                 if active:
                     if event.key == pygame.K_BACKSPACE:
-                        nombre = nombre[:-1]
+                        name = name[:-1]
                     else:
-                        nombre += event.unicode.upper()
+                        name += event.unicode.upper()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if text_box.collidepoint(event.pos):
@@ -94,23 +82,22 @@ while True:
 
                 if start_button.collidepoint(event.pos):
                     player_exist = False
-                    if len(nombre) > 0:
-                        if len(jugadores) == 0:
-                            create_jugador(nombre)
-                            jugadores = get_jugadores()
+                    if len(name) > 0:
+                        if len(players) == 0:
+                            create_player(name)
+                            players = get_players()
 
                         else:
                             exist = []
-                            for element in jugadores:
-                                if element[1] == nombre:
-                                    exist.append(element)
+                            for player in players:
+                                if player[1] == name:
+                                    exist.append(player)
                             if len(exist) == 0:
-                                create_jugador(nombre)
-                                jugadores = get_jugadores()
+                                create_player(name)
+                                players = get_players()
 
                         menu_state = False
                         game_state = True
-                    print(jugadores)
 
                 if ranking_button.collidepoint(event.pos):
                     game_state = False
@@ -120,12 +107,12 @@ while True:
         screen.fill(Colors.dark_blue)
 
         if active:
-            input_color = Colors.verde
+            input_color = Colors.green
         else:
             input_color = Colors.white
 
         pygame.draw.rect(screen, input_color, text_box, 4, 12)
-        text_surface = title_font.render(nombre, True, Colors.naranja)
+        text_surface = title_font.render(name, True, Colors.orange)
         screen.blit(text_surface, (text_box.x + 10, text_box.y + 12))
         text_box.w = max(250, text_surface.get_width() + 10)
 
@@ -134,7 +121,7 @@ while True:
             start_button.x <= a <= start_button.x + 200
             and start_button.y <= b <= start_button.y + 60
         ):
-            pygame.draw.rect(screen, Colors.verde, start_button, 30, 12)
+            pygame.draw.rect(screen, Colors.green, start_button, 30, 12)
         else:
             pygame.draw.rect(screen, Colors.cyan, start_button, 30, 12)
 
@@ -142,7 +129,7 @@ while True:
             ranking_button.x <= a <= ranking_button.x + 200
             and ranking_button.y <= b <= ranking_button.y + 60
         ):
-            pygame.draw.rect(screen, Colors.verde, ranking_button, 30, 12)
+            pygame.draw.rect(screen, Colors.green, ranking_button, 30, 12)
         else:
             pygame.draw.rect(screen, Colors.cyan, ranking_button, 30, 12)
 
@@ -191,10 +178,10 @@ while True:
         y = 110
 
         screen.blit(ranking_text, (100, 20))
-        screen.blit(ranking_text_puntos, (41, 70))
-        screen.blit(ranking_text_nombre, (312, 70))
+        screen.blit(ranking_text_points, (41, 70))
+        screen.blit(ranking_text_name, (312, 70))
 
-        for row in jugadores:
+        for row in players:
             for cell in row:
                 ranking_font.render_to(
                     screen, (x, y), str(cell), pygame.Color("dodgerblue")
@@ -208,7 +195,7 @@ while True:
             menu_button.x <= a <= menu_button.x + 200
             and menu_button.y <= b <= menu_button.y + 60
         ):
-            pygame.draw.rect(screen, Colors.verde, menu_button, 30, 12)
+            pygame.draw.rect(screen, Colors.green, menu_button, 30, 12)
         else:
             pygame.draw.rect(screen, Colors.cyan, menu_button, 30, 12)
 
@@ -241,32 +228,28 @@ while True:
             if event.type == TIMER and game.game_over == False:
                 if game_time > 0:
                     game_time -= 1
-                    print(game_time)
 
             if event.type == GAME_UPDATE and game.game_over == False:
                 game.move_down()
 
         score_value_surface = title_font.render(str(game.score), True, Colors.white)
 
-        if game.game_over == True:
-            game_time = 0
-            for jugador in jugadores:
-                if jugador[1] == nombre:
-                    if jugador[0] < game.score:
-                        update_puntaje_by_name(game.score, nombre)
-
-        time_value = title_font.render(str(game_time), True, Colors.white)
-
         if game_time == 0:
             game.game_over = True
+
+        if game.game_over == True:
+            game_time = 0
+            for player in players:
+                if player[1] == name and player[0] < game.score:
+                    update_puntaje_by_name(game.score, name)
+            screen.blit(game_over_surface, (320, 450, 50, 50))
+
+        time_value = title_font.render(str(game_time), True, Colors.white)
 
         screen.fill(Colors.dark_blue)
         screen.blit(score_surface, (365, 20, 50, 50))
         screen.blit(next_surface, (375, 180, 50, 50))
         screen.blit(time_surface, (375, 500, 50, 50))
-
-        if game.game_over == True:
-            screen.blit(game_over_surface, (320, 450, 50, 50))
 
         pygame.draw.rect(screen, Colors.light_blue, score_rect, 0, 12)
         screen.blit(
