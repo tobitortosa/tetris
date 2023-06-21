@@ -50,7 +50,6 @@ def update_puntaje_by_name(points, name):
 
         for fila in cursor:
             lista = list(fila)
-            print(lista)
             if lista[1] == name:
                 id = lista[0]
 

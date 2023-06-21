@@ -17,7 +17,7 @@ clock = pygame.time.Clock()
 game = Game()
 
 GAME_UPDATE = pygame.USEREVENT
-pygame.time.set_timer(GAME_UPDATE, 30)
+pygame.time.set_timer(GAME_UPDATE, 200)
 
 TIMER = pygame.USEREVENT + 1
 pygame.time.set_timer(TIMER, 1000)
@@ -38,7 +38,7 @@ next_surface = title_font.render("Next", True, Colors.white)
 game_over_surface = title_font.render("GAME OVER", True, Colors.white)
 time_surface = title_font.render("Time", True, Colors.white)
 
-text_box = pygame.Rect(122, 100, 100, 50)
+text_box_rect = pygame.Rect(122, 100, 100, 50)
 score_rect = pygame.Rect(320, 55, 170, 60)
 time_rect = pygame.Rect(320, 530, 170, 60)
 next_rect = pygame.Rect(320, 215, 170, 180)
@@ -75,7 +75,7 @@ while True:
                         name += event.unicode.upper()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if text_box.collidepoint(event.pos):
+                if text_box_rect.collidepoint(event.pos):
                     active = True
                 else:
                     active = False
@@ -111,10 +111,10 @@ while True:
         else:
             input_color = Colors.white
 
-        pygame.draw.rect(screen, input_color, text_box, 4, 12)
+        pygame.draw.rect(screen, input_color, text_box_rect, 4, 12)
         text_surface = title_font.render(name, True, Colors.orange)
-        screen.blit(text_surface, (text_box.x + 10, text_box.y + 12))
-        text_box.w = max(250, text_surface.get_width() + 10)
+        screen.blit(text_surface, (text_box_rect.x + 10, text_box_rect.y + 12))
+        text_box_rect.w = max(250, text_surface.get_width() + 10)
 
         a, b = pygame.mouse.get_pos()
         if (
